@@ -1,0 +1,11 @@
+name: timerplugin
+version: '1.0-SNAPSHOT'
+main: org.denis.timerplugin.Timerplugin
+api-version: '1.21'
+commands:
+  starttimer:
+    description: Start the timer
+    usage: /starttimer
+  stoptimer:
+    description: stops timer
+    usage: /stoptimer
