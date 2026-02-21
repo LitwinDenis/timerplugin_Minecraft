@@ -23,8 +23,7 @@ A lightweight and persistent **Minecraft Timer Plugin** designed for Paper/Spigo
 | **`/stoptimer`** | Pauses the current timer. |
 | **`/resettimer`** | Stops the timer and resets the value to `0`. |
 
-> [!IMPORTANT]
-> By default, these commands are available to all players. You can restrict them using a permission plugin (like LuckPerms) or by adding requirements to the code.
+You need OP-Permissions to use the Timer
 
 ---
 
