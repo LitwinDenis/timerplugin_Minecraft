@@ -9,3 +9,6 @@ commands:
   stoptimer:
     description: stops timer
     usage: /stoptimer
+  resettimer:
+    description: reset timer
+    usage: /resettimer

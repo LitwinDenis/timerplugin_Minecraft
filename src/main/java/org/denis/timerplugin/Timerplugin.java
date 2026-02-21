@@ -21,6 +21,7 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
     public void onEnable() {
         if (getCommand("starttimer") != null) getCommand("starttimer").setExecutor(this);
         if (getCommand("stoptimer") != null) getCommand("stoptimer").setExecutor(this);
+        if (getCommand("resetstimer") != null) getCommand("resetstimer").setExecutor(this);
     }
 
     @Override
@@ -31,22 +32,34 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
                 return true;
             }
             running = true;
-            timeElapsed = 0;
             startTimer();
-            sender.sendMessage(Component.text("Timer started!", NamedTextColor.GREEN));
+            if(timeElapsed == 0) {
+                sender.sendMessage(Component.text("Timer started!", NamedTextColor.GREEN));
+            }else{
+                sender.sendMessage(Component.text("Timer continues running !", NamedTextColor.GREEN));
+            }
             return true;
         }
         if (label.equalsIgnoreCase("stoptimer")) {
             if (!running) {
-                sender.sendMessage(Component.text("Timer already running!", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Timer not running please Start!", NamedTextColor.RED));
                 return true;
             }
 
-            running = false; // Beendet den Timer
+            running = false;
             sender.sendMessage(Component.text("Timer stopped " + formatTime(timeElapsed), NamedTextColor.YELLOW));
             return true;
         }
+        if (label.equalsIgnoreCase("resetstimer")) {
+            running = false;
+            timeElapsed = 0;
+            sender.sendMessage(Component.text("Timer set to 0", NamedTextColor.GREEN));
 
+            for (Player player : Bukkit.getOnlinePlayers()) {
+                player.sendActionBar(Component.text(""));
+            }
+            return true;
+        }
         return false;
     }
 
