@@ -16,12 +16,28 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
 
     private boolean running = false;
     private int timeElapsed = 0;
+    private BukkitRunnable timerTask;
 
     @Override
     public void onEnable() {
         if (getCommand("starttimer") != null) getCommand("starttimer").setExecutor(this);
         if (getCommand("stoptimer") != null) getCommand("stoptimer").setExecutor(this);
-        if (getCommand("resetstimer") != null) getCommand("resetstimer").setExecutor(this);
+        if (getCommand("resettimer") != null) getCommand("resettimer").setExecutor(this);
+
+        saveDefaultConfig();
+
+        timeElapsed = getConfig().getInt("timeElapsed", 0);
+        running = getConfig().getBoolean("running", false);
+
+        if (running) {
+            startTimer();
+        }
+    }
+    @Override
+    public void onDisable() {
+        getConfig().set("timeElapsed", timeElapsed);
+        getConfig().set("running", running);
+        saveConfig();
     }
 
     @Override
@@ -50,7 +66,7 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
             sender.sendMessage(Component.text("Timer stopped " + formatTime(timeElapsed), NamedTextColor.YELLOW));
             return true;
         }
-        if (label.equalsIgnoreCase("resetstimer")) {
+        if (label.equalsIgnoreCase("resettimer")) {
             running = false;
             timeElapsed = 0;
             sender.sendMessage(Component.text("Timer set to 0", NamedTextColor.GREEN));
