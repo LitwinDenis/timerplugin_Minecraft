@@ -31,8 +31,8 @@ A lightweight and persistent **Minecraft Timer Plugin** designed for Paper/Spigo
 ## 📥 Installation
 
 1. Ensure your server is running **Paper** or **Spigot** (Version 1.21+).
-2. Build the project using Maven to get the `timerplugin-1.0-SNAPSHOT.jar`.
-3. Upload the `.jar` file to your `/plugins` folder (e.g., via the **Crafty Dashboard**).
+2. Download the `timerplugin-1.0-SNAPSHOT.jar`.
+3. Upload the `.jar` file to your `/plugins` folder of your Server.
 4. Restart the server or use `/reload confirm`.
 
 ---
