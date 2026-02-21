@@ -12,3 +12,8 @@ commands:
   resettimer:
     description: reset timer
     usage: /resettimer
+
+permissions:
+  timer.use:
+    description: only op rights
+    default: op

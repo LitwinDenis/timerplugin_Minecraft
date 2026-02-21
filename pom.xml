@@ -64,5 +64,12 @@
             <version>1.21.10-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.denis.dashboard</groupId>
+            <artifactId>dashboard_plugin</artifactId>
+            <version>1.0</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 </project>

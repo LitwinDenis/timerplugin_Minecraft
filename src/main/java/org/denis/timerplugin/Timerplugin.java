@@ -4,13 +4,16 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
+import org.denis.plugin.Dashboard;
 
 public final class Timerplugin extends JavaPlugin implements CommandExecutor {
 
@@ -24,8 +27,10 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
         if (getCommand("stoptimer") != null) getCommand("stoptimer").setExecutor(this);
         if (getCommand("resettimer") != null) getCommand("resettimer").setExecutor(this);
 
-        saveDefaultConfig();
 
+        Bukkit.getServicesManager().register(Dashboard.Challenge.class, new TimerChallenge(this), this, ServicePriority.Normal);
+
+        saveDefaultConfig();
         timeElapsed = getConfig().getInt("timeElapsed", 0);
         running = getConfig().getBoolean("running", false);
 
@@ -33,12 +38,17 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
             startTimer();
         }
     }
+    private void registerDashboard() {
+        Bukkit.getServicesManager().register(Dashboard.Challenge.class, new TimerChallenge(this), this, ServicePriority.Normal);
+    }
     @Override
     public void onDisable() {
         getConfig().set("timeElapsed", timeElapsed);
         getConfig().set("running", running);
         saveConfig();
+        if (timerTask != null) timerTask.cancel();
     }
+
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
@@ -49,39 +59,35 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
             }
             running = true;
             startTimer();
-            if(timeElapsed == 0) {
-                sender.sendMessage(Component.text("Timer started!", NamedTextColor.GREEN));
-            }else{
-                sender.sendMessage(Component.text("Timer continues running !", NamedTextColor.GREEN));
-            }
+            sender.sendMessage(Component.text(timeElapsed == 0 ? "Timer started!" : "Timer continues!", NamedTextColor.GREEN));
             return true;
         }
+
         if (label.equalsIgnoreCase("stoptimer")) {
             if (!running) {
-                sender.sendMessage(Component.text("Timer not running please Start!", NamedTextColor.RED));
+                sender.sendMessage(Component.text("Timer not running!", NamedTextColor.RED));
                 return true;
             }
-
             running = false;
-            sender.sendMessage(Component.text("Timer stopped " + formatTime(timeElapsed), NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text("Timer stopped at " + formatTime(timeElapsed), NamedTextColor.YELLOW));
             return true;
         }
+
         if (label.equalsIgnoreCase("resettimer")) {
             running = false;
             timeElapsed = 0;
             sender.sendMessage(Component.text("Timer set to 0", NamedTextColor.GREEN));
-
             for (Player player : Bukkit.getOnlinePlayers()) {
-                player.sendActionBar(Component.text(""));
+                player.sendActionBar(Component.empty());
             }
             return true;
         }
         return false;
     }
 
-    private void startTimer() {
-        new BukkitRunnable() {
-
+    public void startTimer() {
+        if (timerTask != null) timerTask.cancel();
+        timerTask = new BukkitRunnable() {
             @Override
             public void run() {
                 if (!running) {
@@ -89,29 +95,35 @@ public final class Timerplugin extends JavaPlugin implements CommandExecutor {
                     return;
                 }
                 Component message = Component.text(formatTime(timeElapsed), NamedTextColor.DARK_PURPLE, TextDecoration.BOLD);
-
                 for (Player player : Bukkit.getOnlinePlayers()) {
                     player.sendActionBar(message);
                 }
-
                 timeElapsed++;
             }
-        }.runTaskTimer(this, 0L, 20L);
+        };
+        timerTask.runTaskTimer(this, 0L, 20L);
     }
 
-    private String formatTime(int totalseconds) {
-
-        int days = totalseconds / 86400;
-        int hours = (totalseconds % 86400) / 3600;
-        int minutes = (totalseconds % 3600) / 60;
-        int seconds = totalseconds % 60;
+    private String formatTime(int totalSeconds) {
+        int days = totalSeconds / 86400;
+        int hours = (totalSeconds % 86400) / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
 
         if (days > 0) {
-            return String.format("%ddd %02dh %02dm %02ds", days, hours, minutes, seconds);
+            return String.format("%dd %02dh %02dm %02ds", days, hours, minutes, seconds);
         } else {
             return String.format("%02dh %02dm %02ds", hours, minutes, seconds);
         }
+    }
+    public class TimerChallenge implements Dashboard.Challenge {
+        private final Timerplugin plugin;
+        public TimerChallenge(Timerplugin plugin) { this.plugin = plugin; }
 
+        @Override public String getName() { return "Timer Challenge"; }
+        @Override public Material getIcon() { return Material.CLOCK; }
+        @Override public void start() { plugin.running = true; plugin.startTimer(); }
+        @Override public void stop() { plugin.running = false; }
+        @Override public boolean isRunning() { return plugin.running; }
     }
 }
-
